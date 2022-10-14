@@ -12,7 +12,7 @@ cam = cv2.VideoCapture(0) # ? built in cam virkar alltaf
 canvas=[]
 
 
-def isBroken(coords):
+def isFolded(coords):
     x_pow2 = coords.x  * coords.x
     y_pow2 = coords.y  * coords.y
 
