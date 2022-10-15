@@ -7,16 +7,15 @@ mp_drawing = mp.solutions.drawing_utils         # type: ignore
 mp_drawing_styles = mp.solutions.drawing_styles # type: ignore
 mp_hands = mp.solutions.hands                   # type: ignore
 
-cam = cv2.VideoCapture("/dev/video2") # ? usb cam virkar ekki stundum??
-# cam = cv2.VideoCapture(0) # ? built in cam virkar alltaf
+# cam = cv2.VideoCapture("/dev/video2") # ? usb cam virkar ekki stundum??
+cam = cv2.VideoCapture(0) # ? built in cam virkar alltaf
 
 item_pos = [100, 100]
 item_size = 50
 
 canvas=[]
 
-
-def isFolded(coords_top, coords_bot):
+def isFolded(coords_top, coords_bot, range):
     x = coords_top.x - coords_bot.x 
     y = coords_top.y - coords_bot.y
 
@@ -27,7 +26,7 @@ def isFolded(coords_top, coords_bot):
     square = sqrt(sum)
     absolute = abs(square)
 
-    folded = absolute < 0.03
+    folded = absolute < range
 
     return {"folded": folded, "length": absolute}
 
@@ -63,21 +62,24 @@ while cam.isOpened():
         grab = True;
 
         # ! pyautogui.moveTo((1-hPos[9].x)*1920, hPos[9].y*1080)
-        mouse.move((1-hPos[9].x)*2*1920, hPos[9].y*2*1080)
+        # cornerX = 1.75 if 0.15 > hPos[9].x or hPos[9].x > 0.85 else 1
+        # cornerY = 1.75 if 0.15 > hPos[9].y > 0.85 else 1
+        # print(f'x: {cornerX}, y: {cornerY}')
+        # mouse.move((1-hPos[9].x*cornerX)*1920, hPos[9].y*cornerY*1080)
+        mouse.move((1-hPos[9].x*1.75)*1920, hPos[9].y*1.75*1080)
         # print(hPos[8])
 
         for i in range(0,13,4):
-            isit = isFolded(hLen[7+i], hLen[5+i])
+            middle_bottom = isFolded(hLen[7+i], hLen[5+i], 0.025)['folded']
+            top_middle = isFolded(hLen[8+i], hLen[7+i], 0.01)['folded']
             # print(f"{i/4}: {isit}")
-            grab = grab & isit["folded"]
-
-        print(lastClick)
-        print(time.time())
+            grab = grab & (middle_bottom | top_middle) 
+        # print(lastClick)
+        # print(time.time())
         if grab and lastClick + 0.5 < time.time():
-            # print(grab)
-            click((1-hPos[9].x)*2*1920, hPos[9].y*2*1080)
+            click((1-hPos[9].x*1.75)*1920, hPos[9].y*1.75*1080)
             lastClick = time.time()
-            print(lastClick)
+            # print(lastClick)
             # mouse.press()
             # if item_pos[0] - 0.5*item_size <= hPos[9].x*img.shape[1] <= item_pos[0] + 0.5 * item_size and item_pos[1] - 0.5*item_size <= hPos[9].y*img.shape[0] <= item_pos[1] + 0.5 * item_size:
             #     print("get gripið")
@@ -94,7 +96,7 @@ while cam.isOpened():
             )
 
     cv2.circle(img, (item_pos[0], item_pos[1]), item_size, (0, 0, 255), cv2.FILLED)
-            
+    print(result.multi_handedness)        
     # ? til að teikna 2
     if canvas:
         for coords in canvas:
