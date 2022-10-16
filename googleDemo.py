@@ -4,7 +4,7 @@ mp_drawing = mp.solutions.drawing_utils         # type: ignore
 mp_drawing_styles = mp.solutions.drawing_styles # type: ignore
 mp_hands = mp.solutions.hands                   # type: ignore
 
-cap = cv2.VideoCapture("/dev/video2")
+cap = cv2.VideoCapture(0)
 with mp_hands.Hands(
     model_complexity=0,
     max_num_hands = 4,
